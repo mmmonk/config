@@ -1,7 +1,7 @@
 [user]
   name = Marek Lukaszuk
   email = m.lukaszuk@gmail.com
-	signingkey = 96ADCC4C
+  signingkey = 96ADCC4C
 
 [color]
   diff = auto
@@ -10,7 +10,7 @@
 
 [alias]
   co = checkout
-  ci = commit -a
+  ci = commit
   st = status -s
   d = difftool
   send = push --all -q
