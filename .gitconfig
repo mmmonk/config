@@ -9,12 +9,12 @@
   branch = auto
 
 [alias]
-  co = checkout
   ci = commit
-  st = status -s
+  st = status -s -b
   d = difftool
-  send = push --all -q
+  send = push --all
   get = pull -q
+
 
 [diff]
   tool = vimdiff

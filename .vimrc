@@ -1,6 +1,6 @@
 " ~/.vimrc file
-" $Id: 20121003$
-" $Date: 2012-10-03 11:33:42$
+" $Id: 20130410$
+" $Date: 2013-04-10 22:29:48$
 " $Author: Marek Lukaszuk$
 "
 " ideas http://amix.dk/vim/vimrc.html
@@ -298,7 +298,7 @@ function! AddStdHeader()
   unlet s:line
 endfunction
 
-abbre cd call append(".",strftime("%F %T"))
+" abbre cd call append(".",strftime("%F %T"))
 abbre fc call FileCleanUpCases()
 abbre ah call AddStdHeader()
 abbre sws call StripTrailingWhitespace()
