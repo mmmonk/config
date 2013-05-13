@@ -1,41 +1,39 @@
 " ~/.vimrc file
-" $Id: 20130410$
-" $Date: 2013-04-10 22:29:48$
-" $Author: Marek Lukaszuk$
 "
 " ideas http://amix.dk/vim/vimrc.html
 " vim --servername "$HOST-GVIM" --remote-tab-silent
-
-if $HOSTNAME=~"solix"
-  let weAreOnSolix=1
-endif
 
 set autoindent    " autoindent
 set autoread      " automatically read a file when it was modified outside of Vim
 set background=dark
 set backspace=indent,eol,start " powerful backspaces
+set completeopt=longest,menu,preview " completion options
 set display=uhex  " include "uhex" to show unprintable characters as a hex number
 set enc=iso-8859-2
+"set enc=utf-8
 set esckeys       " recognize keys that start with <Esc> in Insert mode
 set expandtab     " spaces instead of tabs
-set ffs=unix,dos  " list of file formats to look for when editing a file
 set ff=unix       " force unix fileformat
+set ffs=unix,dos,mac  " list of file formats to look for when editing a file
 set hidden        " allows hidden buffers to stay unsaved
 "set hls
 set ignorecase    " ignore case when using a search pattern
 set incsearch     " Incremental search.
 set laststatus=2  " when to use a status line for the last window
 set linebreak     " wrap long lines at a character in 'breakat'
+set list
+set listchars=tab:>.,trail:.,extends:#,nbsp:.
 set modeline
-set modelines=1
+set modelines=0
 set mouse=a
 set nobackup      " no backups
-set noswapfile
-set nowritebackup
 set nocompatible
 set noerrorbells
 set nosplitbelow
+set noswapfile
+set nowritebackup
 "set paste
+"set relativenumber
 set ruler
 set scs
 set shiftwidth=2
@@ -45,9 +43,13 @@ set showmode      " Show current vim mode
 set smartcase     " override 'ignorecase' when pattern has upper case characters
 set tabstop=2
 set textwidth=0   " don't wrap words
+set title
+set ttyfast       " better terminal
 set ttymouse=xterm
 set visualbell    " use a visual bell instead of beeping
+set wildignore=*.swp,*.bak,*.pyc,*.class
 set wrap          " Wrap too long lines
+set t_Co=256
 "set verbose=5
 
 " Tell vim to remember certain things when we exit
@@ -59,12 +61,28 @@ set wrap          " Wrap too long lines
 set viminfo='20,\"200,:50,%,n~/.viminfo
 fixdel
 
-filetype plugin on
-filetype indent on
+filetype plugin indent on
 
 " set statusline=[%02n]\ %f\ %(\[%M%R%H]%)%=\ %4l,%02c%2V\ %P%*
 set statusline=%f[%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r%y%=%c,%l/%L\ %P
 "set tabline=%T%X
+
+" up and down are using columns
+nnoremap k gk
+nnoremap j gj
+nnoremap <up> gk
+nnoremap <down> gj
+
+" normal regexp
+nnoremap / /\v
+vnoremap / /\v
+
+" going from bracket to bracket by pressing TAB
+nnoremap <tab> %
+vnoremap <tab> %
+
+" autosave buffers when losing focus
+au FocusLost * :wa
 
 let maplocalleader=','        " all my macros start with ,
 
@@ -77,58 +95,34 @@ if has('diff')
   set diffopt+=iwhite       " ignore all whitespace
 endif
 
-if !exists('weAreOnSolix')
-  set showtabline=2
-  set diffopt+=vertical     " make :diffsplit default to vertical
+set showtabline=2
+set diffopt+=vertical     " make :diffsplit default to vertical
 
-  function! SwitchColorScheme(c1,c2)
-    if g:colors_name == a:c1
-      exe ":colorscheme ".a:c2
-    else
-      exe ":colorscheme ".a:c1
-    endif
-    set background=dark
-  endfunction
-
-  function! SetColorSchemaBaseOnTime(c1,c2)
-    let hour = system("date +%H")
-    if hour > 19 " between 19 and 8 use the c1
-      exe ":colorscheme ".a:c1
-    elseif hour < 8
-      exe ":colorscheme ".a:c1
-    else " during the day use c2
-      exe ":colorscheme ".a:c2
-    endif
-    set background=dark
-  endfunction
-
-  set ttyfast       " better terminal
-  set completeopt=longest,menu,preview " completion options
-
-  "call SetColorSchemaBaseOnTime("desert","ron")
-  colorscheme ron
-  map <F3> :call SwitchColorScheme("desert","ron")<CR>
-
-  if has('gui_running')
-    " set the gui options to:
-    "   g: grey inactive menu items
-    "   m: display menu bar
-    "   r: display scrollbar on right side of window
-    "   b: display scrollbar at bottom of window
-    "   t: enable tearoff menus on Win32
-    "   T: enable toolbar on Win32
-    set guioptions=
-    " set guioptions-=T      " no toolbar
-    set number               " line numbers
-    set guifont=Terminus\ 12 " gui font
-    set nomh                 " no mouse hide
-    "call SetColorSchemaBaseOnTime("desert","pablo")
-    colorscheme ron
-    map <F3> :call SwitchColorScheme("desert","ron")<CR>
+function! SwitchColorScheme(c1,c2)
+  if g:colors_name == a:c1
+    exe ":colorscheme ".a:c2
+  else
+    exe ":colorscheme ".a:c1
   endif
-else
-  set lazyredraw            " do not redraw while running macros (much faster) (LazyRedraw)
-endif
+  set background=dark
+endfunction
+
+function! SetColorSchemaBaseOnTime(c1,c2)
+  let hour = system("date +%H")
+  if hour > 19 " between 19 and 8 use the c1
+    exe ":colorscheme ".a:c1
+  elseif hour < 8
+    exe ":colorscheme ".a:c1
+  else " during the day use c2
+    exe ":colorscheme ".a:c2
+  endif
+  set background=dark
+endfunction
+
+
+"call SetColorSchemaBaseOnTime("desert","ron")
+colorscheme ron
+" map <F3> :call SwitchColorScheme("desert","ron")<CR>
 
 if has('spell')
   " <F12> highlight spelling mistakes
@@ -149,10 +143,10 @@ nmap <F1> :set hls!<CR>
 nnoremap <F2> :set list!<CR>
 
 " toggle line numbers
-" map <F3> :set number!<CR>
+map <F3> :set number!<CR>
 
 " toggle syntax
-map <F4> :if exists("g:syntax_on") <bar> syntax off <bar> else <bar> syntax on <bar> endif<CR>
+" map <F4> :if exists("g:syntax_on") <bar> syntax off <bar> else <bar> syntax on <bar> endif<CR>
 
 " gpg stuff
 nmap <F5> :% ! gpg --clearsign<CR>
@@ -177,6 +171,13 @@ inoremap <F9> <C-O>za
 nnoremap <F9> za
 onoremap <F9> <C-C>za
 vnoremap <F9> zf
+
+" Use Q for formatting the current paragraph (or selection)
+vmap Q gq
+nmap Q gqap
+
+" if I forget that I need to be root to edit a file
+cmap w!! w !sudo tee % >/dev/null
 
 " use ,ww to toggle line wrapping
 nmap <LocalLeader>ww :set wrap! wrap?<cr>
@@ -226,6 +227,7 @@ if has('autocmd')
   function! FileCleanUp()
     call StripTrailingCarriageReturn()
     call StripTrailingWhitespace()
+    retab
   endfunction
 
   function! FileCleanUpCases()
@@ -243,9 +245,9 @@ if has('autocmd')
 
   au BufWrite * call VersionUpdate()
   " clean up trailing white spaces in my scripts
-  au BufWrite $HOME/* call StripTrailingWhitespace()
+  au BufWrite $HOME/* call FileCleanUp()
   " clean up files after reading in the cases subdirectory
-  au BufRead $HOME/store/juniper/* call FileCleanUpCases()
+  " au BufRead $HOME/store/juniper/* call FileCleanUpCases()
 
   augroup Openssl-enc
     au!
@@ -299,7 +301,7 @@ function! AddStdHeader()
 endfunction
 
 " abbre cd call append(".",strftime("%F %T"))
-abbre fc call FileCleanUpCases()
+" abbre fc call FileCleanUpCases()
 abbre ah call AddStdHeader()
 abbre sws call StripTrailingWhitespace()
 abbre wu call VersionUpdate()
