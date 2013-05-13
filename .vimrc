@@ -160,13 +160,16 @@ map <C-t><down> :tabl<cr>
 " map <C-t><left> :tabp<cr>
 " map <C-t><right> :tabn<cr>
 
-map <C-n> :tabnext<CR>
-map <C-p> :tabprevious<CR>
+map <C-l> :tabnext<CR>
+map <C-h> :tabprevious<CR>
 map <C-t> :tabnew<CR>
 map <C-e> :tabedit
 map <C-r> :tabdo
 map <C-s> :vsplit<CR>
 
+
+" folding
+set fdm=marker
 inoremap <F9> <C-O>za
 nnoremap <F9> za
 onoremap <F9> <C-C>za
@@ -273,6 +276,11 @@ if has('autocmd')
 "    au BufNewFile,BufReadPre *.enca :set secure viminfo= noswapfile nobackup nowritebackup history=0 binary
 "    au BufRead *.enca :% ! openssl enc -a -d -aes-256-cbc
 "    au BufWrite *.enca :% ! openssl enc -a -aes-256-cbc
+"  augroup END
+
+"  augroup folds
+"    au BufReadPre * setlocal foldmethod=indent
+"    au BufWinEnter * if &fdm == 'indent' | setlocal foldmethod=manual | endif
 "  augroup END
 
   augroup VimConfig
