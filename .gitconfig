@@ -9,12 +9,13 @@
   branch = auto
 
 [alias]
+  co = checkout
   ci = commit
   st = status -s -b
   d = difftool
-  send = push --all
+  send = push --all -q
+  sendt = push --tags
   get = pull -q
-
 
 [diff]
   tool = vimdiff
@@ -26,4 +27,4 @@
   auto = 1
 [core]
   compression = 9
-
+  gitproxy = ~/bin/git_proxy.sh
