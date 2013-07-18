@@ -40,7 +40,7 @@ Mrxvt.title:                    term
 Mrxvt.currentTabVBell:          True
 #Mrxvt.visualBell:               True
 Mrxvt.syncTabTitle:             True
-#Mrxvt.bellCommand:              ogg123 -q /home/case/store/msx/dialog-warning.oga
+#Mrxvt.bellCommand:              ogg123 -q ~/store/msx/dialog-warning.oga
 Mrxvt.macro.Ctrl+Shift+Left:    GotoTab -1
 Mrxvt.macro.Ctrl+Shift+Right:   GotoTab +1
 Mrxvt.macro.Ctrl+Shift+t:       NewTab
@@ -52,7 +52,6 @@ Mrxvt.macro.Primary+Ctrl+Shift+s:       Str tmux_start.sh 0 \n
 Mrxvt.macro.Primary+Add+Ctrl+Shift+s:   NewTab
 Mrxvt.macro.Primary+Add+Ctrl+Shift+s:   Str ssh_keep.sh xls \n
 Mrxvt.macro.Primary+Add+Ctrl+Shift+s:   NewTab
-Mrxvt.macro.Primary+Add+Ctrl+Shift+s:   GotoTab -1
 Mrxvt.macro.Ctrl+Shift+f:       Exec ff %s
 Mrxvt.macro.Ctrl+Shift+c:       Exec chin %s
 #Mrxvt.macro.Ctrl+Shift+t:       Exec chtor %s

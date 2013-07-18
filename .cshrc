@@ -1,33 +1,41 @@
-# $Id: 20121004$
-# $Date: 2012-10-04 15:31:39$
+# $Id: 20130715$
+# $Date: 2013-07-15 12:40:35$
 
 # A righteous umask
 if ($uid == 0) then
-	umask 022
+  umask 022
   if ( -d /home/case ) then
     cp -u /home/case/{.cshrc,.vimrc,.aliases,.tmux.conf,.screenrc} ~/
   endif
 else
-	umask 77
+  umask 77
 endif
 
 set path = (/sbin /bin /usr/sbin /usr/bin /usr/games /usr/local/sbin /usr/local/bin /usr/X11R6/bin $HOME/bin )
 
-#setenv LC_ALL		  "en_US.ISO8859-1"
-setenv LC_CTYPE	  "pl_PL.ISO8859-2"
+#setenv LC_ALL      "en_US.ISO8859-1"
+setenv LC_CTYPE   "pl_PL.ISO-8859-2"
 #setenv LC_CTYPE   "pl_PL.UTF-8"
-#setenv	LC_MESSAGES	"en_US.ISO8859-1"
-#setenv LC_TIME		  "en_US.ISO8859-1"
+#setenv LC_MESSAGES "en_US.ISO8859-1"
+#setenv LC_TIME     "en_US.ISO8859-1"
 
-setenv EDITOR	vi
+setenv EDITOR vi
 setenv BLOCKSIZE K
 setenv PAGER more
 where less > /dev/null && setenv PAGER less
 where most > /dev/null && setenv PAGER most
 
-setenv	SHOST `echo $HOST | awk -F'.' '{print $1}'`
+setenv  SHOST `echo $HOST | awk -F'.' '{print $1}'`
 
 if ($?prompt) then
+  set red = "%{\033[1;31m%}"
+  set green = "%{\033[0;32m%}"
+  set yellow = "%{\033[1;33m%}"
+  set blue = "%{\033[1;34m%}"
+  set magenta = "%{\033[1;35m%}"
+  set cyan = "%{\033[1;36m%}"
+  set white = "%{\033[0;37m%}"
+  set end = "%{\033[0m%}"
   unset correct
   unset autocorrect
   unset autoexpand
@@ -40,9 +48,11 @@ if ($?prompt) then
   set complete = "Enhance"
   set dunique
   set filec
+  set histfile = ~/.tcsh_history
   set histdup = 'erase'
-  set history = 200
+  set history = 5000
   set implicitcd
+  set listjobs = 'long'
   set mail = (/var/mail/$USER)
   set matchebeep = 'never'
   set noclobber
@@ -50,18 +60,24 @@ if ($?prompt) then
   set nokanji
   set notify
   set padhour
-  set prompt = "[%n@%M %Y/%W/%D %P]\n%/ %# "
+  if ($uid == 0) then
+    set prompt = "[${red}%n${white}@${red}%m ${yellow}%Y${cyan}%W${yellow}%D %T${end}]\n${yellow}%/ ${red}%#${end} "
+  else
+    set prompt = "[${magenta}%n${white}@${blue}%m ${yellow}%Y${cyan}%W${yellow}%D %T${end}]\n${yellow}%/ ${cyan}%#${end} "
+  endif
+  unset red green yellow blue magenta cyan yellow white end # color cleanup
   set printexitvalue
   set rmstar
-  set savehist = 0
+#  set recexact
+  set savehist = (5000 merge)
   set symlinks = 'ignore'
   set time = 60
   set tperiod = 30
   set visiblebell
-#	set watch  = (any any)
+# set watch  = (any any)
   set who    = "%n has %a %l from %M."
   if ( $?tcsh ) then
-#		bindkey "^W" backward-delete-word
+#   bindkey "^W" backward-delete-word
     bindkey -k up history-search-backward
     bindkey -k down history-search-forward
   endif
@@ -134,6 +150,7 @@ if ($?prompt) then
         breaksw
     endsw
   endif
+
   if ( -x /usr/games/fortune && -r ~/fortunes/mysli_zebrane ) then
     echo ""
     /usr/games/fortune ~/fortunes/mysli_zebrane
@@ -177,17 +194,18 @@ if ($?prompt) then
   complete sk 'p/*/$sshhosts/'
   complete ssh 'c/*@/$sshhosts/' 'p/*/$sshhostsandusers//'
   complete telnet 'p@*@`awk \{print\ \$2\} /etc/hosts`@'
+  complete tmux 'p@1@`tmux list-commands | awk \{print\ \$1\} `@'
 
-  complete git 'p/1/(branch checkout diff commit pull push status merge)/' 'n/checkout/`git branch | tr -d "*"`/'
+  complete git 'p@1@`/bin/ls -1 /usr/lib/git-core/ | grep "git-" | sed "s/git-//"`@' 'n/checkout/`git branch | tr -d "*"`/'
 
   ## some docs handling
-  complete zathura 'p/1/f:*.{pdf,PDF}/'
-  complete epdfview 'p/1/f:*.{pdf,PDF}/'
-  complete xchm 'p/1/f:*.{chm,CHM}/'
-  complete geeqie 'p/1/f:*.{jpg,JPG,png,PNG}/'
-  complete unzip 'p/1/f:*.{zip,ZIP}/'
-  complete FBReader 'p/1/f:*.{epub,EPUB}/'
-  complete tar 'p/2/f:*.{tar,TAR,tar.gz,TAR.GZ,tgz,TGZ,tar.bz2,TAR.BZ2,tbz2,TBZ2}/'
+  complete zathura 'p/1/f:*.{pdf,djvu,ps}/'
+  complete epdfview 'p/1/f:*.{pdf}/'
+  complete xchm 'p/1/f:*.{chm}/'
+  complete geeqie 'p/1/f:*.{jpg,png,gif,bmp}/'
+  complete unzip 'p/1/f:*.{zip}/'
+  complete FBReader 'p/1/f:*.{epub}/'
+  complete tar 'p/2/f:*.{tar,tar.gz,tgz,tar.bz2,tbz2}/'
 
   if ( -f ~/.lftp/bookmarks) then
     complete lftp 'p@1@`awk \{print\ \$1\} ~/.lftp/bookmarks`@'
@@ -204,4 +222,8 @@ if ($?prompt) then
   endif
 
   stty -ixon # disable ctrl+s
+
+  if ($?SSH_CLIENT && ! $?TMUX) then
+    where tmux > /dev/null && tmux attach -d
+  endif
 endif
