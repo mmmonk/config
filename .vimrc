@@ -7,6 +7,7 @@ set autoindent    " autoindent
 set autoread      " automatically read a file when it was modified outside of Vim
 set background=dark
 set backspace=indent,eol,start " powerful backspaces
+set tags=.git/tags,tags;
 set completeopt=longest,menu,preview " completion options
 set display=uhex  " include "uhex" to show unprintable characters as a hex number
 set enc=iso-8859-2
@@ -166,7 +167,8 @@ map <C-t> :tabnew<CR>
 map <C-e> :tabedit
 map <C-r> :tabdo
 map <C-s> :vsplit<CR>
-
+" tag backward
+map <C-p> :pop<CR>
 
 " folding
 set fdm=marker
