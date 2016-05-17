@@ -3,15 +3,16 @@
 " ideas http://amix.dk/vim/vimrc.html
 " vim --servername "$HOST-GVIM" --remote-tab-silent
 
+filetype plugin indent on
 set autoindent    " autoindent
 set autoread      " automatically read a file when it was modified outside of Vim
 set background=dark
 set backspace=indent,eol,start " powerful backspaces
-set tags=.git/tags,tags;
+set tags=./tags,./.git/tags;
 set completeopt=longest,menu,preview " completion options
 set display=uhex  " include "uhex" to show unprintable characters as a hex number
-set enc=iso-8859-2
-"set enc=utf-8
+"set enc=iso-8859-2
+set enc=utf-8
 set esckeys       " recognize keys that start with <Esc> in Insert mode
 set expandtab     " spaces instead of tabs
 set ff=unix       " force unix fileformat
@@ -52,6 +53,7 @@ set wildignore=*.swp,*.bak,*.pyc,*.class
 set wrap          " Wrap too long lines
 set t_Co=256
 "set verbose=5
+set colorcolumn=80
 
 " Tell vim to remember certain things when we exit
 "  '10  :  marks will be remembered for up to 10 previously edited files
@@ -62,11 +64,89 @@ set t_Co=256
 set viminfo='20,\"200,:50,%,n~/.viminfo
 fixdel
 
+" {{{ colors
+colorscheme ron
+hi clear
+
+" tabs colors "{{{
+hi TabLineFill ctermfg=blue ctermbg=blue
+hi TabLine ctermfg=white ctermbg=blue
+hi TabLineSel ctermfg=yellow ctermbg=darkblue
+"}}}
+
+" folds "{{{
+hi FoldColumn ctermfg=green ctermbg=darkgrey
+hi Folded ctermfg=cyan ctermbg=darkgrey
+"}}}
+
+" status highlights "{{{
+hi User1 ctermbg=darkblue ctermfg=black cterm=bold
+hi User2 ctermbg=darkblue ctermfg=cyan cterm=bold
+hi User3 ctermbg=darkblue ctermfg=white cterm=bold
+hi User4 ctermbg=darkblue ctermfg=green cterm=bold
+hi User5 ctermbg=red ctermfg=darkblue cterm=bold
+hi User6 ctermbg=darkblue ctermfg=magenta cterm=bold
+"}}}
+
+" splitbar
+hi VertSplit ctermbg=darkblue ctermfg=green cterm=bold
+
+" reverse colors for selection 
+hi visual cterm=reverse
+
+" default the statusline to green when entering Vim
+hi StatusLine ctermbg=darkblue ctermfg=green cterm=bold
+hi StatusLineNC ctermbg=darkblue ctermfg=blue cterm=bold
+
+" now set it up to change the status line based on mode
+if version >= 700
+  au InsertEnter * hi User4 ctermbg=red ctermfg=black cterm=bold
+  au InsertLeave * hi User4 ctermbg=darkblue ctermfg=green cterm=bold
+endif
+" }}}
+
+set statusline=   " clear the statusline for when vimrc is reloaded
+set statusline+=%1*
+set statusline+=%n                      " buffer number
+set statusline+=%0*
+set statusline+=\ 
+set statusline+=%4*
+set statusline+=%F\                          " file name
+set statusline+=%5*
+set statusline+=%h%m%r%w                     " flags
+set statusline+=%0*
+set statusline+=[%{strlen(&ft)?&ft:'none'},  " filetype
+set statusline+=%{strlen(&fenc)?&fenc:&enc}, " encoding
+set statusline+=%{&fileformat}]              " file format
+set statusline+=%6*
+set statusline+=\ %{&paste?'paste':''}              " file format
+set statusline+=%0*
+set statusline+=%=                           " right align
+set statusline+=%6*
+set statusline+=%{getcwd()}\ 
+set statusline+=%2*
+set statusline+=[%b,0x%B]                 " current char
+set statusline+=%3*
+set statusline+=\ [%l,%c%V]\ %<%P\             " offset
+set statusline+=%2*
+set statusline+=%{'['.&spl.']'}
+set statusline+=%0*
+
+" save read-only file using sudo 
+cmap w!! %!sudo tee > /dev/null %
+
 filetype plugin indent on
 
-" set statusline=[%02n]\ %f\ %(\[%M%R%H]%)%=\ %4l,%02c%2V\ %P%*
-set statusline=%f[%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r%y%=%c,%l/%L\ %P
-"set tabline=%T%X
+if &term =~ "xterm" || &term =~ "screen" || &term =~ "rxvt"
+
+  if &term =~ '256color'
+      " disable Background Color Erase (BCE) so that color schemes
+      " render properly when inside 256-color tmux and GNU screen.
+      " see also http://sunaku.github.io/vim-256color-bce.html
+      set t_ut=
+  endif
+
+endif
 
 " up and down are using columns
 nnoremap k gk
@@ -99,41 +179,10 @@ endif
 set showtabline=2
 set diffopt+=vertical     " make :diffsplit default to vertical
 
-function! SwitchColorScheme(c1,c2)
-  if g:colors_name == a:c1
-    exe ":colorscheme ".a:c2
-  else
-    exe ":colorscheme ".a:c1
-  endif
-  set background=dark
-endfunction
-
-function! SetColorSchemaBaseOnTime(c1,c2)
-  let hour = system("date +%H")
-  if hour > 19 " between 19 and 8 use the c1
-    exe ":colorscheme ".a:c1
-  elseif hour < 8
-    exe ":colorscheme ".a:c1
-  else " during the day use c2
-    exe ":colorscheme ".a:c2
-  endif
-  set background=dark
-endfunction
-
-
-"call SetColorSchemaBaseOnTime("desert","ron")
-colorscheme ron
-" map <F3> :call SwitchColorScheme("desert","ron")<CR>
-
 if has('spell')
   " <F12> highlight spelling mistakes
   nmap <F12> :set spell!<CR>
-  " <sp> set dictionary to Polish
-  nmap <LocalLeader>sp :set spl=pl<CR>
 
-  " <se> set dictionary to English
-  nmap <LocalLeader>se :set spl=en<CR>
-  set spl=en
   set sps=best
 endif
 
@@ -149,12 +198,14 @@ map <F3> :set number!<CR>
 " toggle syntax
 " map <F4> :if exists("g:syntax_on") <bar> syntax off <bar> else <bar> syntax on <bar> endif<CR>
 
+"set paste
+"set relativenumber
 " gpg stuff
-nmap <F5> :% ! gpg --clearsign<CR>
-nmap <F6> :% ! gpg --verify<CR>
-nmap <F7> :% ! gpg --encrypt<CR>
-nmap a<F7> :% ! gpg -a --encrypt<CR>
-nmap <F8> :% ! gpg --decrypt<CR>
+nmap <F5> :set paste!<CR>
+nmap <F6> :set relativenumber!<CR>
+" nmap <F7> :% ! gpg --encrypt<CR>
+" nmap a<F7> :% ! gpg -a --encrypt<CR>
+" nmap <F8> :% ! gpg --decrypt<CR>
 
 map <C-t><up> :tabr<cr>
 map <C-t><down> :tabl<cr>
@@ -163,8 +214,9 @@ map <C-t><down> :tabl<cr>
 
 map <C-l> :tabnext<CR>
 map <C-h> :tabprevious<CR>
-map <C-t> :tabnew<CR>
-map <C-e> :tabedit
+map <C-T> :tabnew<CR>
+map <C-W> :confirm bdelete<CR>
+map <C-e> :tabnew<CR>
 map <C-r> :tabdo
 map <C-s> :vsplit<CR>
 " tag backward
@@ -172,17 +224,10 @@ map <C-p> :pop<CR>
 
 " folding
 set fdm=marker
-inoremap <F9> <C-O>za
-nnoremap <F9> za
-onoremap <F9> <C-C>za
-vnoremap <F9> zf
 
 " Use Q for formatting the current paragraph (or selection)
 vmap Q gq
 nmap Q gqap
-
-" if I forget that I need to be root to edit a file
-cmap w!! w !sudo tee % >/dev/null
 
 " use ,ww to toggle line wrapping
 nmap <LocalLeader>ww :set wrap! wrap?<cr>
@@ -190,107 +235,94 @@ nmap <LocalLeader>ww :set wrap! wrap?<cr>
 " toggle paste mode.  Everything is inserted literally - no indending
 set pastetoggle=<F11>
 
-if has('autocmd')
+if has('autocmd') " {{{ 
 
-  function! ResCur()
+  function! ResCur() " {{{
     if line("'\"") <= line("$")
       normal! g`"
       return 1
     endif
-  endfunction
+  endfunction " }}}
 
+  function! StripTrailingCarriageReturn() " {{{
   " clean up the \r at the end of lines
-  function! StripTrailingCarriageReturn()
     exec "normal ma" | " this saves the current position in the file
     %s/\r//e
     exec "normal `a" | " this restores the current position in the file
-  endfunction
+  endfunction " }}}
 
+  function! StripTrailingWhitespace() " {{{
   " this function as the name suggests strips the trailing
   " white characters from the end of the lines
-  function! StripTrailingWhitespace()
     exec "normal ma" | " this saves the current position in the file
     %s/\s\+$//e
     exec "normal `a" | " this restores the current position in the file
-  endfunction
+  endfunction " }}}
 
-  " this function modifies automatically the version number
-  " and the last modified timestamp
-  function! VersionUpdate()
-    if &modified
-      let endl = min ([20,line("$")]) " we will search max 20 first lines
-      exec "normal ma" | " this saves the current position in the file
-      try
-        exe ":1,".endl." s/\$Id.*\$/$Id: ".strftime("%Y%m%d")."$/e"
-        exe ":1,".endl." s/\$Date.*\$/$Date: ".strftime("%F %T")."$/e"
-      catch
-      endtry
-      exec "normal `a" | " this restores the current position in the file
-    endif
-  endfunction
+  function! ShowLineLimit() " {{{ 
+    " warning for lines that are above 80 characters
+    let w:m1=matchadd('Search', '\%<81v.\%>77v', -1)
+    let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+  endfunction " }}}
 
-  function! FileCleanUp()
+  function! FileCleanUp() " {{{
     call StripTrailingCarriageReturn()
     call StripTrailingWhitespace()
     retab
-  endfunction
+  endfunction " }}}
 
-  function! FileCleanUpCases()
-    exec "normal ma" | " this saves the current position in the file
-    exec ":%! cjc.pl"
-    call StripTrailingCarriageReturn()
-    call StripTrailingWhitespace()
-    exec "normal `a" | " this restores the current position in the file
-  endfunction
-
-  augroup ResCur
+  augroup ResCur " {{{
     au!
     au BufWinEnter * call ResCur()
-  augroup END
+  augroup END " }}}
 
-  au BufWrite * call VersionUpdate()
-  " clean up trailing white spaces in my scripts
-  au BufWrite $HOME/* call FileCleanUp()
-  " clean up files after reading in the cases subdirectory
-  " au BufRead $HOME/store/juniper/* call FileCleanUpCases()
-
-  augroup Openssl-enc
+  augroup Openssl-enc " {{{
     au!
     au BufNewFile,BufReadPre *.enc :set secure viminfo= noswapfile nobackup nowritebackup history=0
     au BufRead *.enc :% ! openssl enc -a -d -aes-256-cbc
     au BufWrite *.enc :% ! openssl enc -a -aes-256-cbc
-  augroup END
+  augroup END " }}}
 
-  augroup Openssl-enc-bzip2
+  augroup Openssl-enc-bzip2 " {{{
     au!
     au BufNewFile,BufReadPre *.bz2enc :set secure viminfo= noswapfile nobackup nowritebackup history=0
     au BufRead *.bz2enc :% ! openssl enc -a -d -aes-256-cbc | bzip2 -d -c
     au BufWrite *.bz2enc :% ! bzip2 -c | openssl enc -a -aes-256-cbc
-  augroup END
+  augroup END " }}}
 
-  augroup Makefile
+  augroup Makefile " {{{
     au!
     au BufRead Makefile :set noexpandtab
-  augroup END
+  augroup END " }}}
 
-"  augroup Openssl-enca
-"    au!
-"    au BufNewFile,BufReadPre *.enca :set secure viminfo= noswapfile nobackup nowritebackup history=0 binary
-"    au BufRead *.enca :% ! openssl enc -a -d -aes-256-cbc
-"    au BufWrite *.enca :% ! openssl enc -a -aes-256-cbc
-"  augroup END
+  " clean up trailing white spaces in my scripts
+  au BufWrite $HOME/store/tools/* call FileCleanUp()
+  "au BufRead,BufNewFile $HOME/store/tools/*.py call ShowLineLimit()
 
-"  augroup folds
-"    au BufReadPre * setlocal foldmethod=indent
-"    au BufWinEnter * if &fdm == 'indent' | setlocal foldmethod=manual | endif
-"  augroup END
+  " muttrc file syntax
+  au BufRead,BufNewFile $HOME/.mutt/*.conf :set filetype=muttrc
 
-  augroup VimConfig
+  augroup VimConfig " {{{
     au!
     au BufWritePost ~/.vimrc so ~/.vimrc
-    "au BufWritePost .vimrc   so ~/.vimrc
-  augroup END
-endif
+  augroup END " }}}
+
+endif " }}}
+
+func! GitGrep(...) "{{{
+  let grepsave = &grepprg
+  set grepprg=git\ grep\ -n\ $*
+  let s = 'grep'
+  for i in a:000
+    let s = s . ' ' . i
+  endfor
+  exe s
+  let &grepprg = grepsave
+endfun
+
+command! -nargs=? G execute 'silent call GitGrep(<f-args>)' | cw | redraw!
+nnoremap <C-F> :tab split<CR>:G <cword><CR>
+"}}}
 
 " local changes
 if filereadable(expand("~/.vimrc.local"))
@@ -298,21 +330,3 @@ if filereadable(expand("~/.vimrc.local"))
 endif
 
 set secure
-
-" ################################
-" # adding custom header variables
-" ################################
-function! AddStdHeader()
-  let s:line=line(".")
-  call append(s:line," $Id$")
-  call append(s:line+1," $Date$")
-  call append(s:line+2," $Author: Marek Lukaszuk$")
-  unlet s:line
-endfunction
-
-" abbre cd call append(".",strftime("%F %T"))
-" abbre fc call FileCleanUpCases()
-abbre ah call AddStdHeader()
-abbre sws call StripTrailingWhitespace()
-abbre wu call VersionUpdate()
-abbre te tabedit
